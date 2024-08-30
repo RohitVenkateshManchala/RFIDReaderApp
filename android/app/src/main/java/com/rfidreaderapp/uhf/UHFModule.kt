@@ -22,13 +22,17 @@ class UHFModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMod
 
     @ReactMethod
     fun openUHF(promise: Promise) {
-        val result = uhfService?.open() ?: false
-        if (result) {
-            promise.resolve("UHF module opened successfully")
+    try {
+        val isSuccess = uhfService?.open() ?: false
+        if (isSuccess) {
+            promise.resolve("UHF Module opened successfully")
         } else {
-            promise.reject("E_OPEN_FAILED", "Failed to open UHF module")
+            promise.reject("E_OPEN_UHF_FAILED", "Failed to open UHF module")
         }
+    } catch (e: Exception) {
+        promise.reject("E_OPEN_UHF_EXCEPTION", "Exception opening UHF module: ${e.message}", e)
     }
+}
 
     @ReactMethod
     fun closeUHF(promise: Promise) {
@@ -54,37 +58,41 @@ class UHFModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMod
 
     @ReactMethod
     fun getTemperature(promise: Promise) {
-        val temperature = uhfService?.temperature
-        if (temperature != null) {
+        try {
+            val temperature = uhfService?.getTemperature() ?: -1
             promise.resolve(temperature)
-        } else {
-            promise.reject("E_TEMP_FAILED", "Failed to get temperature")
+        } catch (e: Exception) {
+            promise.reject("E_GET_TEMPERATURE_FAILED", "Failed to get temperature", e)
         }
     }
 
     @ReactMethod
     fun getPower(promise: Promise) {
-        val power = uhfService?.power ?: 0
-        promise.resolve(power)
+        try {
+            val power = uhfService?.getPower() ?: -1
+            promise.resolve(power)
+        } catch (e: Exception) {
+            promise.reject("E_GET_POWER_FAILED", "Failed to get power", e)
+        }
     }
 
     @ReactMethod
     fun setPower(power: Int, promise: Promise) {
-        val result = uhfService?.setPower(power) ?: false
-        if (result) {
-            promise.resolve("Power set to $power dBm")
-        } else {
-            promise.reject("E_POWER_FAILED", "Failed to set power")
+        try {
+            val result = uhfService?.setPower(power) ?: false
+            promise.resolve(result)
+        } catch (e: Exception) {
+            promise.reject("E_SET_POWER_FAILED", "Failed to set power", e)
         }
     }
 
     @ReactMethod
     fun getRegion(promise: Promise) {
-        val region = uhfService?.region
-        if (region != null) {
+        try {
+            val region = uhfService?.getRegion() ?: "Unknown"
             promise.resolve(region)
-        } else {
-            promise.reject("E_REGION_FAILED", "Failed to get region")
+        } catch (e: Exception) {
+            promise.reject("E_GET_REGION_FAILED", "Failed to get region", e)
         }
     }
 
@@ -139,6 +147,12 @@ class UHFModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMod
         }
 
         promise.resolve(tagIDs)
+    }
+
+    @ReactMethod
+    fun getTagIDCount(promise: Promise) {
+        val count = uhfService?.getTagIDCount() ?: 0
+        promise.resolve(count)
     }
 
     @ReactMethod
