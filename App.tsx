@@ -1,7 +1,7 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Image } from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {Image} from 'react-native';
 
 // Import your images
 
@@ -10,17 +10,16 @@ import CheckTagsScreen from './src/screens/CheckTagsScreen';
 import ParametersScreen from './src/screens/ParametersScreen';
 
 const Tab = createBottomTabNavigator();
-const assignIcon = require('./src/images/assignTag.png')
-const checkIcon = require('./src/images/checkTag.png')
-const parametersIcon = require('./src/images/parameter.png')
-
+const assignIcon = require('./src/images/assignTag.png');
+const checkIcon = require('./src/images/checkTag.png');
+const parametersIcon = require('./src/images/parameter.png');
 
 const App: React.FC = () => {
   return (
     <NavigationContainer>
       <Tab.Navigator
-        screenOptions={({ route }) => ({
-          tabBarIcon: ({ focused }) => {
+        screenOptions={({route}) => ({
+          tabBarIcon: ({focused}) => {
             let iconName;
 
             if (route.name === 'Assign Tags') {
@@ -45,20 +44,28 @@ const App: React.FC = () => {
           },
           tabBarActiveTintColor: 'tomato',
           tabBarInactiveTintColor: 'gray',
-        })}
-      >
-        <Tab.Screen name="Assign Tags" component={ScanAssignScreen} />
-        <Tab.Screen name="Check Tags" component={CheckTagsScreen} />
-        <Tab.Screen name="Parameters" component={ParametersScreen} />
+        })}>
+        <Tab.Screen
+          name="Assign Tags"
+          component={ScanAssignScreen}
+          options={{headerShown: false}}
+        />
+        <Tab.Screen
+          name="Check Tags"
+          component={CheckTagsScreen}
+          options={{headerShown: false}}
+        />
+        <Tab.Screen
+          name="Parameters"
+          component={ParametersScreen}
+          options={{headerShown: false}}
+        />
       </Tab.Navigator>
     </NavigationContainer>
   );
 };
 
 export default App;
-
-
-
 
 // import React from 'react';
 // import RFIDScanner from './src/RFIDScanner';
@@ -68,4 +75,3 @@ export default App;
 // };
 
 // export default App;
-

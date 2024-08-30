@@ -5,9 +5,9 @@ import { NativeModules } from 'react-native';
 const { UHFModule } = NativeModules;
 
 const ParametersScreen: React.FC = () => {
-  const [power, setPower] = useState<number | null>(null);
-  const [temperature, setTemperature] = useState<number | null>(null);
-  const [region, setRegion] = useState<string>('Unknown');
+  const [power, setPower] = useState<number | null>(30);
+  const [temperature, setTemperature] = useState<number | null>(0);
+  const [region, setRegion] = useState<string>('-');
   const [inputPower, setInputPower] = useState<string>('');
 
   const handleGetPower = async () => {
