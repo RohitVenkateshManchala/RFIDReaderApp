@@ -1,9 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Button, FlatList, Modal, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {
+  View,
+  Text,
+  Button,
+  FlatList,
+  Modal,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NativeModules } from 'react-native';
+import {NativeModules} from 'react-native';
 
-const { UHFModule } = NativeModules;
+const {UHFModule} = NativeModules;
 
 const ScanAssignScreen: React.FC = () => {
   const [unassignedTags, setUnassignedTags] = useState<string[]>([]);
@@ -26,7 +35,9 @@ const ScanAssignScreen: React.FC = () => {
     initializeUHF();
 
     return () => {
-      UHFModule.closeUHF().catch((error: any) => console.error((error as Error).message));
+      UHFModule.closeUHF().catch((error: any) =>
+        console.error((error as Error).message),
+      );
       clearInterval(intervalId); // Ensure the interval is cleared when unmounting
     };
   }, []);
@@ -43,16 +54,19 @@ const ScanAssignScreen: React.FC = () => {
       intervalId = setInterval(async () => {
         const tags = await UHFModule.getTagIDs();
         const assignedTags = await getAssignedTags();
-        const unassigned = tags.map(trimTrailingZeros).filter((tag: string) => !assignedTags[tag]);
+        const unassigned = tags
+          .map(trimTrailingZeros)
+          .filter((tag: string) => !assignedTags[tag]);
 
-        setUnassignedTags((prevTags) => {
-          const newTags = unassigned.filter((tag:any) => !prevTags.includes(tag));
+        setUnassignedTags(prevTags => {
+          const newTags = unassigned.filter(
+            (tag: any) => !prevTags.includes(tag),
+          );
           return [...prevTags, ...newTags];
         });
 
         const count = await UHFModule.getTagIDCount();
         setTagCount(count);
-
       }, 500); // Adjust the interval as needed
     } catch (error) {
       console.error(error);
@@ -70,13 +84,13 @@ const ScanAssignScreen: React.FC = () => {
     }
   };
 
-  const clearList = async () =>{
+  const clearList = async () => {
     await stopScanning();
     setUnassignedTags([]);
     setTagCount(0);
-  }
+  };
 
-  const getAssignedTags = async (): Promise<{ [key: string]: string }> => {
+  const getAssignedTags = async (): Promise<{[key: string]: string}> => {
     const storedData = await AsyncStorage.getItem('assignedTags');
     return storedData ? JSON.parse(storedData) : {};
   };
@@ -110,25 +124,31 @@ const ScanAssignScreen: React.FC = () => {
         <Button title="Stop Scan" onPress={stopScanning} />
       )}
       <View style={styles.row}>
-      <Text style={styles.tagInfo}>Total Tags Scanned: {tagCount}</Text>
-      <TouchableOpacity onPress={clearList}>
+        <Text style={styles.tagInfo}>Total Tags Scanned: {tagCount}</Text>
+        {/* <TouchableOpacity onPress={clearList}>
         <Text style={styles.clearButton}>Clear</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       </View>
       <FlatList
         data={unassignedTags}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={styles.tagItem} onPress={() => openModal(item)}>
+        keyExtractor={item => item}
+        renderItem={({item}) => (
+          <TouchableOpacity
+            style={styles.tagItem}
+            onPress={() => openModal(item)}>
             <Text>{item}</Text>
           </TouchableOpacity>
         )}
-        ListEmptyComponent={<Text style={styles.emptyText}>No unassigned tags found.</Text>}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>No unassigned tags found.</Text>
+        }
       />
       <Modal visible={isModalVisible} transparent={true} animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Assign Object to Tag: {selectedTag}</Text>
+            <Text style={styles.modalTitle}>
+              Assign Object to Tag: {selectedTag}
+            </Text>
             <TextInput
               style={styles.input}
               placeholder="Enter object name"
@@ -136,10 +156,14 @@ const ScanAssignScreen: React.FC = () => {
               onChangeText={setObjectName}
             />
             <View style={styles.buttonRow}>
-              <TouchableOpacity style={[styles.button, styles.assignButton]} onPress={handleAssignTag}>
+              <TouchableOpacity
+                style={[styles.button, styles.assignButton]}
+                onPress={handleAssignTag}>
                 <Text style={styles.buttonText}>Assign</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => setIsModalVisible(false)}>
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={() => setIsModalVisible(false)}>
                 <Text style={styles.buttonText}>Cancel</Text>
               </TouchableOpacity>
             </View>
@@ -164,7 +188,7 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 4,
+    // elevation: 4,
   },
   emptyText: {
     textAlign: 'center',
@@ -207,6 +231,7 @@ const styles = StyleSheet.create({
   },
   tagInfo: {
     fontSize: 16,
+    marginTop: 10,
     marginRight: 10,
   },
   clearButton: {

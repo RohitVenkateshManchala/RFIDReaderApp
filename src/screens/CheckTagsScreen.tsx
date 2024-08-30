@@ -8,7 +8,7 @@ const { UHFModule } = NativeModules;
 const CheckTagsScreen: React.FC = () => {
   const [scannedTags, setScannedTags] = useState<{ tag: string, status: 'present' | 'missing' }[]>([]);
   const [scanning, setScanning] = useState<boolean>(false);
-  const [tagCount, setTagCount] = useState<number>(0);
+  // const [tagCount, setTagCount] = useState<number>(0);
   let intervalId: NodeJS.Timeout;
 
   const trimTrailingZeros = (tag: string): string => {
@@ -32,7 +32,7 @@ const CheckTagsScreen: React.FC = () => {
         setScannedTags(tagsWithStatus);
 
         const count = await UHFModule.getTagIDCount();
-        setTagCount(count);
+        // setTagCount(count);
 
       }, 500); // Adjust the interval as needed
     } catch (error) {
@@ -54,7 +54,7 @@ const CheckTagsScreen: React.FC = () => {
   const clearList = async () =>{
     await stopScanning();
     setScannedTags([]);
-    setTagCount(0);
+    // setTagCount(0);
   }
 
   const getAssignedTags = async (): Promise<{ [key: string]: string }> => {
@@ -89,10 +89,10 @@ const CheckTagsScreen: React.FC = () => {
         <Button title="Stop Scan" onPress={stopScanning} />
       )}
       <View style={styles.row}>
-        <Text style={styles.tagInfo}>Total Tags Scanned: {tagCount}</Text>
-        <TouchableOpacity onPress={clearList}>
+        {/* <Text style={styles.tagInfo}>Total Tags Scanned: {tagCount}</Text> */}
+        {/* <TouchableOpacity onPress={clearList}>
           <Text style={styles.clearButton}>Clear</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
       <FlatList
         data={scannedTags}
@@ -161,6 +161,7 @@ const styles = StyleSheet.create({
   },
   tagInfo: {
     fontSize: 16,
+    marginTop: 10,
     marginRight: 10,
   },
   clearButton: {
