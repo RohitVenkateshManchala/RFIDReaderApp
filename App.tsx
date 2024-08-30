@@ -2,14 +2,12 @@ import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {Image} from 'react-native';
-
-// Import your images
-
 import ScanAssignScreen from './src/screens/ScanAssignScreen';
 import CheckTagsScreen from './src/screens/CheckTagsScreen';
 import ParametersScreen from './src/screens/ParametersScreen';
 
 const Tab = createBottomTabNavigator();
+// Import your images
 const assignIcon = require('./src/images/assignTag.png');
 const checkIcon = require('./src/images/checkTag.png');
 const parametersIcon = require('./src/images/parameter.png');
