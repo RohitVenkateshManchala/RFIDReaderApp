@@ -1,8 +1,17 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, ScrollView } from 'react-native';
-import { NativeModules } from 'react-native';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import {NativeModules} from 'react-native';
 
-const { UHFModule } = NativeModules;
+const {UHFModule} = NativeModules;
 
 const ParametersScreen: React.FC = () => {
   const [power, setPower] = useState<number | null>(30);
@@ -50,45 +59,62 @@ const ParametersScreen: React.FC = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>UHF Parameters</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
+      <ScrollView>
+        <Text style={styles.header}>UHF Parameters</Text>
 
-      <View style={styles.section}>
-        <Text style={styles.label}>Power (0-30 dBm):</Text>
-        <Text style={styles.value}>{power !== null ? `${power} dBm` : 'Unknown'}</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Set Power (dBm)"
-          value={inputPower}
-          onChangeText={setInputPower}
-          keyboardType="numeric"
-        />
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={[styles.button, styles.getButton]} onPress={handleGetPower}>
-            <Text style={styles.buttonText}>Get Power</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.button, styles.setButton]} onPress={handleSetPower}>
-            <Text style={styles.buttonText}>Set Power</Text>
+        <View style={styles.section}>
+          <Text style={styles.label}>Power (5-30 dBm):</Text>
+          <Text style={styles.value}>
+            {power !== null ? `${power} dBm` : 'Unknown'}
+          </Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Set Power (dBm)"
+            value={inputPower}
+            onChangeText={setInputPower}
+            keyboardType="numeric"
+          />
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[styles.button, styles.getButton]}
+              onPress={handleGetPower}>
+              <Text style={styles.buttonText}>Get Power</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, styles.setButton]}
+              onPress={handleSetPower}>
+              <Text style={styles.buttonText}>Set Power</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.label}>Temperature:</Text>
+          <Text style={styles.value}>
+            {temperature !== null ? `${temperature} °C` : 'Unknown'}
+          </Text>
+          <TouchableOpacity
+            style={[styles.button, styles.getButton]}
+            onPress={handleGetTemperature}>
+            <Text style={styles.buttonText}>Get Temperature</Text>
           </TouchableOpacity>
         </View>
-      </View>
 
-      <View style={styles.section}>
-        <Text style={styles.label}>Temperature:</Text>
-        <Text style={styles.value}>{temperature !== null ? `${temperature} °C` : 'Unknown'}</Text>
-        <TouchableOpacity style={[styles.button, styles.getButton]} onPress={handleGetTemperature}>
-          <Text style={styles.buttonText}>Get Temperature</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.label}>Region:</Text>
-        <Text style={styles.value}>{region}</Text>
-        <TouchableOpacity style={[styles.button, styles.getButton]} onPress={handleGetRegion}>
-          <Text style={styles.buttonText}>Get Region</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+        <View style={styles.section}>
+          <Text style={styles.label}>Region:</Text>
+          <Text style={styles.value}>{region}</Text>
+          <TouchableOpacity
+            style={[styles.button, styles.getButton]}
+            onPress={handleGetRegion}>
+            <Text style={styles.buttonText}>Get Region</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -102,7 +128,7 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: 'bold',
     color: '#2f3640',
-    marginBottom: 30,
+    marginBottom: 10,
     textAlign: 'center',
   },
   section: {
