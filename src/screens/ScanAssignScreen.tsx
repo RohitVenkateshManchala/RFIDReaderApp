@@ -136,6 +136,8 @@ const ScanAssignScreen: React.FC = () => {
           fontSize: 'lg',
           fontWeight: 'bold',
           color: 'red',
+          textDecorationLine: 'none'
+
         }}>
           Clear
         </Button>
@@ -199,8 +201,7 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: 'center',
     marginTop: 20,
-    fontSize: 16,
-    color: '#888',
+    fontSize: 14,
   },
   assignText: {
     fontSize: 16,

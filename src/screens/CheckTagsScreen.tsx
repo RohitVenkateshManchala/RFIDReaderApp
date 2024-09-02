@@ -99,6 +99,7 @@ const CheckTagsScreen: React.FC = () => {
           fontSize: 'lg', 
           fontWeight: 'bold', 
           color: 'red',
+          textDecorationLine: 'none'
         }}>
           Clear
         </Button>
