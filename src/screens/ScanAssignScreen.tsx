@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
   Text,
@@ -21,7 +21,7 @@ const ScanAssignScreen: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
   const [scanning, setScanning] = useState<boolean>(false);
   const [tagCount, setTagCount] = useState<number>(0);
-  let intervalId: NodeJS.Timeout;
+  const intervalId = useRef<NodeJS.Timeout | null>(null); // Use useRef for intervalId
 
   useEffect(() => {
     const initializeUHF = async () => {
@@ -35,12 +35,12 @@ const ScanAssignScreen: React.FC = () => {
     initializeUHF();
 
     return () => {
-      UHFModule.closeUHF().catch((error: any) =>
-        console.error((error as Error).message),
-      );
-      clearInterval(intervalId); // Ensure the interval is cleared when unmounting
+      if (intervalId.current) {
+        clearInterval(intervalId.current);
+      }
+      UHFModule.closeUHF().catch((error: any) => console.error("Failed to close UHF module: ", (error as Error).message));
     };
-  }, []);
+  }, [])
 
   const trimTrailingZeros = (tag: string): string => {
     return tag.replace(/0+$/, '');
@@ -51,7 +51,7 @@ const ScanAssignScreen: React.FC = () => {
       await UHFModule.startScan();
       setScanning(true);
 
-      intervalId = setInterval(async () => {
+      intervalId.current = setInterval(async () => {
         const tags = await UHFModule.getTagIDs();
         const assignedTags = await getAssignedTags();
         const unassigned = tags
@@ -75,12 +75,14 @@ const ScanAssignScreen: React.FC = () => {
 
   const stopScanning = async () => {
     try {
-      clearInterval(intervalId);
-      const stopMessage = await UHFModule.stopScan();
-      console.log(stopMessage);
+      if (intervalId.current) {
+        clearInterval(intervalId.current);
+        intervalId.current = null;
+      }
+      await UHFModule.stopScan();
       setScanning(false);
     } catch (error) {
-      console.error(error);
+      console.error("Error stopping scan: ", error);
     }
   };
 
@@ -125,9 +127,9 @@ const ScanAssignScreen: React.FC = () => {
       )}
       <View style={styles.row}>
         <Text style={styles.tagInfo}>Total Tags Scanned: {tagCount}</Text>
-        {/* <TouchableOpacity onPress={clearList}>
+        <TouchableOpacity onPress={clearList}>
         <Text style={styles.clearButton}>Clear</Text>
-      </TouchableOpacity> */}
+      </TouchableOpacity>
       </View>
       <FlatList
         data={unassignedTags}

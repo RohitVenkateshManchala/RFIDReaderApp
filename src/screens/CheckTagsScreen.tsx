@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeModules } from 'react-native';
@@ -9,7 +9,7 @@ const CheckTagsScreen: React.FC = () => {
   const [scannedTags, setScannedTags] = useState<{ tag: string, status: 'present' | 'missing' }[]>([]);
   const [scanning, setScanning] = useState<boolean>(false);
   // const [tagCount, setTagCount] = useState<number>(0);
-  let intervalId: NodeJS.Timeout;
+  const intervalId = useRef<NodeJS.Timeout | null>(null); // Use useRef for intervalId
 
   const trimTrailingZeros = (tag: string): string => {
     return tag.replace(/0+$/, '');
@@ -20,7 +20,7 @@ const CheckTagsScreen: React.FC = () => {
       await UHFModule.startScan();
       setScanning(true);
 
-      intervalId = setInterval(async () => {
+      intervalId.current = setInterval(async () => {
         const assignedTags = await getAssignedTags();
         const detectedTags = await UHFModule.getTagIDs();
 
@@ -42,12 +42,14 @@ const CheckTagsScreen: React.FC = () => {
 
   const stopScanning = async () => {
     try {
-      clearInterval(intervalId);
-      const stopMessage = await UHFModule.stopScan();
-      console.log(stopMessage);
+      if(intervalId.current){
+        clearInterval(intervalId.current);
+        intervalId.current = null;
+      }
+      await UHFModule.stopScan();
       setScanning(false);
     } catch (error) {
-      console.error(error);
+      console.error("Error stopping scan: ", error);
     }
   };
 
@@ -89,10 +91,10 @@ const CheckTagsScreen: React.FC = () => {
         <Button title="Stop Scan" onPress={stopScanning} />
       )}
       <View style={styles.row}>
-        {/* <Text style={styles.tagInfo}>Total Tags Scanned: {tagCount}</Text> */}
-        {/* <TouchableOpacity onPress={clearList}>
+      {/* <Text style={styles.tagInfo}>Total Tags Scanned: {tagCount}</Text> */}
+        <TouchableOpacity onPress={clearList}>
           <Text style={styles.clearButton}>Clear</Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
       </View>
       <FlatList
         data={scannedTags}
