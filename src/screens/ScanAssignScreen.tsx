@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   Box,
   FlatList,
@@ -10,9 +10,9 @@ import {
   Button,
 } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NativeModules, TouchableOpacity, StyleSheet } from 'react-native';
+import {NativeModules, TouchableOpacity, StyleSheet} from 'react-native';
 
-const { UHFModule } = NativeModules;
+const {UHFModule} = NativeModules;
 
 const ScanAssignScreen: React.FC = () => {
   const [unassignedTags, setUnassignedTags] = useState<string[]>([]);
@@ -39,7 +39,7 @@ const ScanAssignScreen: React.FC = () => {
         clearInterval(intervalId.current);
       }
       UHFModule.closeUHF().catch((error: any) =>
-        console.error("Failed to close UHF module: ", (error as Error).message)
+        console.error('Failed to close UHF module: ', (error as Error).message),
       );
     };
   }, []);
@@ -60,9 +60,9 @@ const ScanAssignScreen: React.FC = () => {
           .map(trimTrailingZeros)
           .filter((tag: string) => !assignedTags[tag]);
 
-        setUnassignedTags((prevTags) => {
+        setUnassignedTags(prevTags => {
           const newTags = unassigned.filter(
-            (tag: any) => !prevTags.includes(tag)
+            (tag: any) => !prevTags.includes(tag),
           );
           return [...prevTags, ...newTags];
         });
@@ -84,7 +84,7 @@ const ScanAssignScreen: React.FC = () => {
       await UHFModule.stopScan();
       setScanning(false);
     } catch (error) {
-      console.error("Error stopping scan: ", error);
+      console.error('Error stopping scan: ', error);
     }
   };
 
@@ -94,7 +94,7 @@ const ScanAssignScreen: React.FC = () => {
     setTagCount(0);
   };
 
-  const getAssignedTags = async (): Promise<{ [key: string]: string }> => {
+  const getAssignedTags = async (): Promise<{[key: string]: string}> => {
     const storedData = await AsyncStorage.getItem('assignedTags');
     return storedData ? JSON.parse(storedData) : {};
   };
@@ -109,7 +109,7 @@ const ScanAssignScreen: React.FC = () => {
   const handleAssignTag = async () => {
     if (selectedTag && objectName.trim()) {
       await saveAssignedTag(selectedTag, objectName);
-      setUnassignedTags(unassignedTags.filter((tag) => tag !== selectedTag));
+      setUnassignedTags(unassignedTags.filter(tag => tag !== selectedTag));
       setIsModalVisible(false);
       setObjectName('');
     }
@@ -132,13 +132,14 @@ const ScanAssignScreen: React.FC = () => {
             Stop Scan
           </Button>
         )}
-        <Button variant="link" onPress={clearList} _text={{
-          fontSize: 'lg',
-          fontWeight: 'bold',
-          color: 'red',
-          textDecorationLine: 'none'
-
-        }}>
+        <Button
+          variant="link"
+          onPress={clearList}
+          _text={{
+            fontSize: 'lg',
+            fontWeight: 'bold',
+            color: 'red',
+          }}>
           Clear
         </Button>
       </HStack>
@@ -147,12 +148,11 @@ const ScanAssignScreen: React.FC = () => {
       </HStack>
       <FlatList
         data={unassignedTags}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => (
+        keyExtractor={item => item}
+        renderItem={({item}) => (
           <TouchableOpacity
             style={styles.tagItem}
-            onPress={() => openModal(item)}
-          >
+            onPress={() => openModal(item)}>
             <Text>{item}</Text>
           </TouchableOpacity>
         )}
@@ -174,11 +174,11 @@ const ScanAssignScreen: React.FC = () => {
           </Modal.Body>
           <Modal.Footer>
             <HStack justifyContent="space-between" width="100%">
-              <TouchableOpacity onPress={handleAssignTag}>
-                <Text style={styles.assignText}>Assign</Text>
-              </TouchableOpacity>
               <TouchableOpacity onPress={() => setIsModalVisible(false)}>
                 <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleAssignTag}>
+                <Text style={styles.assignText}>Assign</Text>
               </TouchableOpacity>
             </HStack>
           </Modal.Footer>
@@ -201,7 +201,8 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: 'center',
     marginTop: 20,
-    fontSize: 14,
+    fontSize: 16,
+    color: '#888',
   },
   assignText: {
     fontSize: 16,

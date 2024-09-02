@@ -1,12 +1,23 @@
-import React, { useRef, useState } from 'react';
-import { NativeBaseProvider, Box, Button, FlatList, Text, VStack, HStack, ScrollView } from 'native-base';
+import React, {useRef, useState} from 'react';
+import {
+  NativeBaseProvider,
+  Box,
+  Button,
+  FlatList,
+  Text,
+  VStack,
+  HStack,
+  ScrollView,
+} from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { NativeModules } from 'react-native';
+import {NativeModules} from 'react-native';
 
-const { UHFModule } = NativeModules;
+const {UHFModule} = NativeModules;
 
 const CheckTagsScreen: React.FC = () => {
-  const [scannedTags, setScannedTags] = useState<{ tag: string, status: 'present' | 'missing' }[]>([]);
+  const [scannedTags, setScannedTags] = useState<
+    {tag: string; status: 'present' | 'missing'}[]
+  >([]);
   const [scanning, setScanning] = useState<boolean>(false);
   // const [tagCount, setTagCount] = useState<number>(0);
   const intervalId = useRef<NodeJS.Timeout | null>(null); // Use useRef for intervalId
@@ -26,14 +37,15 @@ const CheckTagsScreen: React.FC = () => {
 
         const tagsWithStatus = Object.keys(assignedTags).map(tag => ({
           tag: assignedTags[tag],
-          status: detectedTags.map(trimTrailingZeros).includes(tag) ? 'present' : 'missing' as 'present' | 'missing'
+          status: detectedTags.map(trimTrailingZeros).includes(tag)
+            ? 'present'
+            : ('missing' as 'present' | 'missing'),
         }));
 
         setScannedTags(tagsWithStatus);
 
         const count = await UHFModule.getTagIDCount();
         // setTagCount(count);
-
       }, 500); // Adjust the interval as needed
     } catch (error) {
       console.error(error);
@@ -42,24 +54,24 @@ const CheckTagsScreen: React.FC = () => {
 
   const stopScanning = async () => {
     try {
-      if(intervalId.current){
+      if (intervalId.current) {
         clearInterval(intervalId.current);
         intervalId.current = null;
       }
       await UHFModule.stopScan();
       setScanning(false);
     } catch (error) {
-      console.error("Error stopping scan: ", error);
+      console.error('Error stopping scan: ', error);
     }
   };
 
-  const clearList = async () =>{
+  const clearList = async () => {
     await stopScanning();
     setScannedTags([]);
     // setTagCount(0);
-  }
+  };
 
-  const getAssignedTags = async (): Promise<{ [key: string]: string }> => {
+  const getAssignedTags = async (): Promise<{[key: string]: string}> => {
     const storedData = await AsyncStorage.getItem('assignedTags');
     return storedData ? JSON.parse(storedData) : {};
   };
@@ -69,17 +81,24 @@ const CheckTagsScreen: React.FC = () => {
       const assignedTags = await getAssignedTags();
 
       // Find the key corresponding to the object name (tag) to delete
-      const tagKey = Object.keys(assignedTags).find(key => assignedTags[key] === tag);
+      const tagKey = Object.keys(assignedTags).find(
+        key => assignedTags[key] === tag,
+      );
 
       if (tagKey) {
-        delete assignedTags[tagKey];  // Remove the assignment
-        await AsyncStorage.setItem('assignedTags', JSON.stringify(assignedTags));
+        delete assignedTags[tagKey]; // Remove the assignment
+        await AsyncStorage.setItem(
+          'assignedTags',
+          JSON.stringify(assignedTags),
+        );
 
         // Update the scannedTags state to reflect the change
-        setScannedTags(scannedTags.filter(scannedTag => scannedTag.tag !== tag));
+        setScannedTags(
+          scannedTags.filter(scannedTag => scannedTag.tag !== tag),
+        );
       }
     } catch (error) {
-      console.error("Failed to delete tag assignment:", error);
+      console.error('Failed to delete tag assignment:', error);
     }
   };
 
@@ -95,12 +114,14 @@ const CheckTagsScreen: React.FC = () => {
             Stop Scan
           </Button>
         )}
-        <Button variant="link" onPress={clearList} _text={{
-          fontSize: 'lg', 
-          fontWeight: 'bold', 
-          color: 'red',
-          textDecorationLine: 'none'
-        }}>
+        <Button
+          variant="link"
+          onPress={clearList}
+          _text={{
+            fontSize: 'lg',
+            fontWeight: 'bold',
+            color: 'red',
+          }}>
           Clear
         </Button>
       </HStack>
@@ -109,30 +130,37 @@ const CheckTagsScreen: React.FC = () => {
           <FlatList
             data={scannedTags}
             numColumns={2}
-            keyExtractor={(item) => item.tag}
-            renderItem={({ item }) => (
+            keyExtractor={item => item.tag}
+            renderItem={({item}) => (
               <Box
-                bg="white"
+                bg={item.status === 'present' ? 'green.100' : 'red.100'}
                 shadow={2}
                 rounded="lg"
                 p={4}
                 m={2}
                 flex={1}
-                maxWidth="48%"
-              >
-                <Text fontSize="lg" mb={2}>{item.tag}</Text>
+                maxWidth="48%">
+                <Text fontSize="lg" mb={2}>
+                  {item.tag}
+                </Text>
                 <Text
                   fontSize="md"
-                  color={item.status === 'present' ? 'green.500' : 'red.500'}
-                >
+                  color={item.status === 'present' ? 'green.500' : 'red.500'}>
                   {item.status.toUpperCase()}
                 </Text>
-                <Button mt={2} colorScheme="red" onPress={() => deleteTagAssignment(item.tag)}>
-                  Delete
+                <Button
+                  mt={2}
+                  colorScheme="red"
+                  onPress={() => deleteTagAssignment(item.tag)}>
+                  Un-Assign
                 </Button>
               </Box>
             )}
-            ListEmptyComponent={<Text textAlign="center" mt={4}>No tags scanned yet.</Text>}
+            ListEmptyComponent={
+              <Text textAlign="center" mt={4}>
+                No tags scanned yet.
+              </Text>
+            }
           />
         </VStack>
       </ScrollView>

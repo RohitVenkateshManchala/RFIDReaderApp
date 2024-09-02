@@ -1,44 +1,57 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
-  TextInput,
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import {NativeModules} from 'react-native';
+import {Slider} from 'native-base';
 
 const {UHFModule} = NativeModules;
 
 const ParametersScreen: React.FC = () => {
-  const [power, setPower] = useState<number | null>(30);
   const [temperature, setTemperature] = useState<number | null>(0);
   const [region, setRegion] = useState<string>('-');
-  const [inputPower, setInputPower] = useState<string>('');
+  const [inputPower, setInputPower] = useState<number>(30);
+
+  useEffect(() => {
+    handleGetPower();
+    handleGetTemperature();
+    handleGetRegion();
+  }, []);
 
   const handleGetPower = async () => {
     try {
       const powerValue = await UHFModule.getPower();
-      setPower(powerValue);
+      // setPower(powerValue);
+      setInputPower(powerValue);
     } catch (error) {
       console.error('Failed to get power:', error);
     }
   };
 
-  const handleSetPower = async () => {
+  const handleSetPower = async (value: number) => {
     try {
-      const powerValue = parseInt(inputPower, 10);
-      const result = await UHFModule.setPower(powerValue);
+      const newPower = Math.floor(value);
+      const result = await UHFModule.setPower(newPower);
       if (result) {
-        setPower(powerValue);
+        setInputPower(newPower);
+        // setPower(newPower);
       }
     } catch (error) {
       console.error('Failed to set power:', error);
     }
   };
+
+  // const handleSliderChange = async (value: number) => {
+  //   const roundedValue = Math.floor(value);
+  //   // setInputPower(roundedValue);
+  //   await handleSetPower(roundedValue);
+  // };
 
   const handleGetTemperature = async () => {
     try {
@@ -67,18 +80,25 @@ const ParametersScreen: React.FC = () => {
         <Text style={styles.header}>UHF Parameters</Text>
 
         <View style={styles.section}>
-          <Text style={styles.label}>Power (5-30 dBm):</Text>
-          <Text style={styles.value}>
-            {power !== null ? `${power} dBm` : 'Unknown'}
-          </Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Set Power (dBm)"
+          <View style={styles.rowContainer}>
+            <Text style={styles.label}>Power (5-30 dBm):</Text>
+            <Text style={styles.value}>{inputPower} dBm</Text>
+          </View>
+
+          <Slider
             value={inputPower}
-            onChangeText={setInputPower}
-            keyboardType="numeric"
-          />
-          <View style={styles.buttonContainer}>
+            onChange={handleSetPower}
+            minValue={5}
+            maxValue={30}
+            step={1}
+            size="lg">
+            <Slider.Track>
+              <Slider.FilledTrack />
+            </Slider.Track>
+            <Slider.Thumb />
+          </Slider>
+
+          {/* <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.button, styles.getButton]}
               onPress={handleGetPower}>
@@ -86,17 +106,19 @@ const ParametersScreen: React.FC = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, styles.setButton]}
-              onPress={handleSetPower}>
+              onPress={() => handleSetPower(inputPower)}>
               <Text style={styles.buttonText}>Set Power</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.label}>Temperature:</Text>
-          <Text style={styles.value}>
-            {temperature !== null ? `${temperature} °C` : 'Unknown'}
-          </Text>
+          <View style={styles.rowContainer}>
+            <Text style={styles.label}>Temperature:</Text>
+            <Text style={styles.value}>
+              {temperature !== null ? `${temperature} °C` : 'Unknown'}
+            </Text>
+          </View>
           <TouchableOpacity
             style={[styles.button, styles.getButton]}
             onPress={handleGetTemperature}>
@@ -105,8 +127,10 @@ const ParametersScreen: React.FC = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.label}>Region:</Text>
-          <Text style={styles.value}>{region}</Text>
+          <View style={styles.rowContainer}>
+            <Text style={styles.label}>Region:</Text>
+            <Text style={styles.value}>{region}</Text>
+          </View>
           <TouchableOpacity
             style={[styles.button, styles.getButton]}
             onPress={handleGetRegion}>
@@ -128,7 +152,7 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: 'bold',
     color: '#2f3640',
-    marginBottom: 10,
+    marginBottom: 5,
     textAlign: 'center',
   },
   section: {
@@ -139,28 +163,23 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.15,
     shadowRadius: 10,
-    elevation: 5,
+    elevation: 1,
+  },
+  rowContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   label: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 10,
     color: '#7f8fa6',
   },
   value: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#487eb0',
-    marginBottom: 20,
-  },
-  input: {
-    height: 45,
-    borderColor: '#ced6e0',
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-    backgroundColor: '#f9f9f9',
-    marginBottom: 20,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -168,10 +187,10 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-    padding: 15,
+    padding: 10,
     borderRadius: 8,
     alignItems: 'center',
-    marginHorizontal: 5,
+    // marginHorizontal: 5,
   },
   getButton: {
     backgroundColor: '#44bd32',
