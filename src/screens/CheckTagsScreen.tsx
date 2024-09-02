@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { View, Text, Button, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { NativeBaseProvider, Box, Button, FlatList, Text, VStack, HStack, ScrollView } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NativeModules } from 'react-native';
 
@@ -84,93 +84,59 @@ const CheckTagsScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      {!scanning ? (
-        <Button title="Check Tags" onPress={handleCheckTags} />
-      ) : (
-        <Button title="Stop Scan" onPress={stopScanning} />
-      )}
-      <View style={styles.row}>
-      {/* <Text style={styles.tagInfo}>Total Tags Scanned: {tagCount}</Text> */}
-        <TouchableOpacity onPress={clearList}>
-          <Text style={styles.clearButton}>Clear</Text>
-        </TouchableOpacity>
-      </View>
-      <FlatList
-        data={scannedTags}
-        keyExtractor={(item) => item.tag}
-        renderItem={({ item }) => (
-          <View style={[styles.tagItem, item.status === 'present' ? styles.present : styles.missing]}>
-            <Text>{item.tag}</Text>
-            <TouchableOpacity onPress={() => deleteTagAssignment(item.tag)} style={styles.deleteButton}>
-              <Text style={styles.deleteButtonText}>Delete</Text>
-            </TouchableOpacity>
-          </View>
+    <Box flex={1} p={4} bg="gray.100">
+      <HStack justifyContent="space-between" mb={4}>
+        {!scanning ? (
+          <Button onPress={handleCheckTags} colorScheme="primary">
+            Check Tags
+          </Button>
+        ) : (
+          <Button onPress={stopScanning} colorScheme="danger">
+            Stop Scan
+          </Button>
         )}
-        ListEmptyComponent={<Text style={styles.emptyText}>No tags scanned yet.</Text>}
-      />
-    </View>
+        <Button variant="link" onPress={clearList} _text={{
+          fontSize: 'lg', 
+          fontWeight: 'bold', 
+          color: 'red',
+        }}>
+          Clear
+        </Button>
+      </HStack>
+      <ScrollView>
+        <VStack space={4} flex={1}>
+          <FlatList
+            data={scannedTags}
+            numColumns={2}
+            keyExtractor={(item) => item.tag}
+            renderItem={({ item }) => (
+              <Box
+                bg="white"
+                shadow={2}
+                rounded="lg"
+                p={4}
+                m={2}
+                flex={1}
+                maxWidth="48%"
+              >
+                <Text fontSize="lg" mb={2}>{item.tag}</Text>
+                <Text
+                  fontSize="md"
+                  color={item.status === 'present' ? 'green.500' : 'red.500'}
+                >
+                  {item.status.toUpperCase()}
+                </Text>
+                <Button mt={2} colorScheme="red" onPress={() => deleteTagAssignment(item.tag)}>
+                  Delete
+                </Button>
+              </Box>
+            )}
+            ListEmptyComponent={<Text textAlign="center" mt={4}>No tags scanned yet.</Text>}
+          />
+        </VStack>
+      </ScrollView>
+    </Box>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#f7f7f7',
-  },
-  tagItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    marginVertical: 8,
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
-    backgroundColor: '#fff',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  present: {
-    backgroundColor: '#d4edda',
-    borderColor: '#c3e6cb',
-  },
-  missing: {
-    backgroundColor: '#f8d7da',
-    borderColor: '#f5c6cb',
-  },
-  deleteButton: {
-    padding: 8,
-    backgroundColor: '#ff4d4f',
-    borderRadius: 4,
-  },
-  deleteButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-  },
-  emptyText: {
-    textAlign: 'center',
-    marginTop: 20,
-    fontSize: 16,
-    color: '#888',
-  },
-  tagInfo: {
-    fontSize: 16,
-    marginTop: 10,
-    marginRight: 10,
-  },
-  clearButton: {
-    fontSize: 16,
-    color: 'tomato',
-    textDecorationLine: 'underline',
-  },
-});
 
 export default CheckTagsScreen;
