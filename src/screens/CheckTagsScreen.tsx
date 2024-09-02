@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {NativeModules} from 'react-native';
+import {NativeModules, Vibration} from 'react-native';
 
 const {UHFModule} = NativeModules;
 
@@ -19,8 +19,7 @@ const CheckTagsScreen: React.FC = () => {
     {tag: string; status: 'present' | 'missing'}[]
   >([]);
   const [scanning, setScanning] = useState<boolean>(false);
-  // const [tagCount, setTagCount] = useState<number>(0);
-  const intervalId = useRef<NodeJS.Timeout | null>(null); // Use useRef for intervalId
+  const intervalId = useRef<NodeJS.Timeout | null>(null);
 
   const trimTrailingZeros = (tag: string): string => {
     return tag.replace(/0+$/, '');
@@ -42,10 +41,15 @@ const CheckTagsScreen: React.FC = () => {
             : ('missing' as 'present' | 'missing'),
         }));
 
-        setScannedTags(tagsWithStatus);
+        // Trigger vibration for each newly detected tag
+        const newTags = tagsWithStatus.filter(
+          tag => !scannedTags.some(scannedTag => scannedTag.tag === tag.tag),
+        );
+        if (newTags.length > 0) {
+          Vibration.vibrate(200); // Vibrate for 200ms
+        }
 
-        const count = await UHFModule.getTagIDCount();
-        // setTagCount(count);
+        setScannedTags(tagsWithStatus);
       }, 500); // Adjust the interval as needed
     } catch (error) {
       console.error(error);
@@ -68,7 +72,6 @@ const CheckTagsScreen: React.FC = () => {
   const clearList = async () => {
     await stopScanning();
     setScannedTags([]);
-    // setTagCount(0);
   };
 
   const getAssignedTags = async (): Promise<{[key: string]: string}> => {
@@ -80,19 +83,17 @@ const CheckTagsScreen: React.FC = () => {
     try {
       const assignedTags = await getAssignedTags();
 
-      // Find the key corresponding to the object name (tag) to delete
       const tagKey = Object.keys(assignedTags).find(
         key => assignedTags[key] === tag,
       );
 
       if (tagKey) {
-        delete assignedTags[tagKey]; // Remove the assignment
+        delete assignedTags[tagKey];
         await AsyncStorage.setItem(
           'assignedTags',
           JSON.stringify(assignedTags),
         );
 
-        // Update the scannedTags state to reflect the change
         setScannedTags(
           scannedTags.filter(scannedTag => scannedTag.tag !== tag),
         );
@@ -133,26 +134,25 @@ const CheckTagsScreen: React.FC = () => {
             keyExtractor={item => item.tag}
             renderItem={({item}) => (
               <Box
-                bg={item.status === 'present' ? 'green.100' : 'red.100'}
-                shadow={2}
+                bg={item.status === 'present' ? 'green.600' : 'red.400'}
                 rounded="lg"
                 p={4}
                 m={2}
                 flex={1}
                 maxWidth="48%">
-                <Text fontSize="lg" mb={2}>
+                <Text fontSize="xl" mb={2} fontWeight="bold" color='white'>
                   {item.tag}
                 </Text>
-                <Text
+                {/* <Text
                   fontSize="md"
-                  color={item.status === 'present' ? 'green.500' : 'red.500'}>
+                  color="white">
                   {item.status.toUpperCase()}
-                </Text>
+                </Text> */}
                 <Button
                   mt={2}
                   colorScheme="red"
                   onPress={() => deleteTagAssignment(item.tag)}>
-                  Un-Assign
+                  Unassign
                 </Button>
               </Box>
             )}

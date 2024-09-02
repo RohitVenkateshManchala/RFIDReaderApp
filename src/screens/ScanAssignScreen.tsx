@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   FlatList,
@@ -10,9 +10,9 @@ import {
   Button,
 } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {NativeModules, TouchableOpacity, StyleSheet} from 'react-native';
+import { NativeModules, TouchableOpacity, StyleSheet, Vibration } from 'react-native';
 
-const {UHFModule} = NativeModules;
+const { UHFModule } = NativeModules;
 
 const ScanAssignScreen: React.FC = () => {
   const [unassignedTags, setUnassignedTags] = useState<string[]>([]);
@@ -64,6 +64,10 @@ const ScanAssignScreen: React.FC = () => {
           const newTags = unassigned.filter(
             (tag: any) => !prevTags.includes(tag),
           );
+          // Trigger vibration for each newly added tag
+          if (newTags.length > 0) {
+            Vibration.vibrate(200); // Vibrate for 200ms
+          }
           return [...prevTags, ...newTags];
         });
 
@@ -94,7 +98,7 @@ const ScanAssignScreen: React.FC = () => {
     setTagCount(0);
   };
 
-  const getAssignedTags = async (): Promise<{[key: string]: string}> => {
+  const getAssignedTags = async (): Promise<{ [key: string]: string }> => {
     const storedData = await AsyncStorage.getItem('assignedTags');
     return storedData ? JSON.parse(storedData) : {};
   };
@@ -208,13 +212,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: 'green',
-    // textDecorationLine: 'underline',
   },
   cancelText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: 'red',
-    // textDecorationLine: 'underline',
   },
 });
 
